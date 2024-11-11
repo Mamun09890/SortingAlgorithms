@@ -1,0 +1,182 @@
+package com.example.sorting;
+
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class SortingAlgorithms {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input sorting algorithm choice
+        System.out.println("Choose a sorting algorithm: ");
+        System.out.println("1 - Merge Sort");
+        System.out.println("2 - Quick Sort");
+        System.out.println("3 - Counting Sort");
+        System.out.println("4 - Radix Sort");
+        int choice = scanner.nextInt();
+
+        // Input array elements
+        System.out.println("Enter the number of elements:");
+        int n = scanner.nextInt();
+        int[] array = new int[n];
+        System.out.println("Enter the elements:");
+        for (int i = 0; i < n; i++) {
+            array[i] = scanner.nextInt();
+        }
+
+        // Sort based on user choice
+        switch (choice) {
+            case 1:
+                System.out.println("Performing Merge Sort:");
+                mergeSort(array, 0, array.length - 1);
+                break;
+            case 2:
+                System.out.println("Performing Quick Sort:");
+                quickSort(array, 0, array.length - 1);
+                break;
+            case 3:
+                System.out.println("Performing Counting Sort:");
+                array = countingSort(array);
+                break;
+            case 4:
+                System.out.println("Performing Radix Sort:");
+                radixSort(array);
+                break;
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+
+        // Output sorted array
+        System.out.println("Sorted array: " + Arrays.toString(array));
+    }
+
+    // Merge Sort
+    public static void mergeSort(int[] array, int left, int right) {
+        if (left < right) {
+            int mid = (left + right) / 2;
+
+            mergeSort(array, left, mid);
+            mergeSort(array, mid + 1, right);
+
+            merge(array, left, mid, right);
+        }
+    }
+
+    public static void merge(int[] array, int left, int mid, int right) {
+        int[] leftArr = Arrays.copyOfRange(array, left, mid + 1);
+        int[] rightArr = Arrays.copyOfRange(array, mid + 1, right + 1);
+
+        int i = 0, j = 0, k = left;
+        while (i < leftArr.length && j < rightArr.length) {
+            if (leftArr[i] <= rightArr[j]) {
+                array[k++] = leftArr[i++];
+            } else {
+                array[k++] = rightArr[j++];
+            }
+            System.out.println("Merge Step: " + Arrays.toString(array));
+        }
+        
+        while (i < leftArr.length) {
+            array[k++] = leftArr[i++];
+            System.out.println("Merge Step: " + Arrays.toString(array));
+        }
+        
+        while (j < rightArr.length) {
+            array[k++] = rightArr[j++];
+            System.out.println("Merge Step: " + Arrays.toString(array));
+        }
+    }
+
+    // Quick Sort
+    public static void quickSort(int[] array, int low, int high) {
+        if (low < high) {
+            int pivotIndex = partition(array, low, high);
+
+            quickSort(array, low, pivotIndex - 1);
+            quickSort(array, pivotIndex + 1, high);
+        }
+    }
+
+    public static int partition(int[] array, int low, int high) {
+        int pivot = array[high];
+        int i = low - 1;
+
+        for (int j = low; j < high; j++) {
+            if (array[j] <= pivot) {
+                i++;
+                int temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+                System.out.println("Quick Sort Step: " + Arrays.toString(array));
+            }
+        }
+
+        int temp = array[i + 1];
+        array[i + 1] = array[high];
+        array[high] = temp;
+        System.out.println("Quick Sort Step: " + Arrays.toString(array));
+
+        return i + 1;
+    }
+
+    // Counting Sort
+    public static int[] countingSort(int[] array) {
+        int max = Arrays.stream(array).max().orElse(0);
+        int min = Arrays.stream(array).min().orElse(0);
+        int range = max - min + 1;
+
+        int[] count = new int[range];
+        int[] output = new int[array.length];
+
+        for (int num : array) {
+            count[num - min]++;
+        }
+
+        System.out.println("Counting array after counting elements: " + Arrays.toString(count));
+
+        for (int i = 1; i < count.length; i++) {
+            count[i] += count[i - 1];
+        }
+
+        System.out.println("Counting array after cumulative addition: " + Arrays.toString(count));
+
+        for (int i = array.length - 1; i >= 0; i--) {
+            output[count[array[i] - min] - 1] = array[i];
+            count[array[i] - min]--;
+            System.out.println("Counting Sort Step: " + Arrays.toString(output));
+        }
+
+        return output;
+    }
+
+    // Radix Sort
+    public static void radixSort(int[] array) {
+        int max = Arrays.stream(array).max().orElse(0);
+        for (int exp = 1; max / exp > 0; exp *= 10) {
+            countingSortForRadix(array, exp);
+            System.out.println("Radix Sort Step (exp=" + exp + "): " + Arrays.toString(array));
+        }
+    }
+
+    public static void countingSortForRadix(int[] array, int exp) {
+        int[] output = new int[array.length];
+        int[] count = new int[10];
+
+        for (int num : array) {
+            count[(num / exp) % 10]++;
+        }
+
+        for (int i = 1; i < 10; i++) {
+            count[i] += count[i - 1];
+        }
+
+        for (int i = array.length - 1; i >= 0; i--) {
+            output[count[(array[i] / exp) % 10] - 1] = array[i];
+            count[(array[i] / exp) % 10]--;
+        }
+
+        System.arraycopy(output, 0, array, 0, array.length);
+    }
+}
